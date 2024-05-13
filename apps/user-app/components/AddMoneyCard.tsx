@@ -23,17 +23,22 @@ export const AddMoney = () => {
   );
   const [amount, setAmount] = useState(0);
   const [provider, setProvider] = useState(SUPPORTED_BANKS[0]?.name || "");
-  const [error, setError] = useState();
+  const [error, setError] = useState<string | undefined>(undefined);
   const handleOnClick = async () => {
     try {
-      await createOnRampTransaction(provider, amount);
-      window.location.href = redirectUrl || "";
+      const res = await createOnRampTransaction(provider, amount);
+      if (res.message) {
+        setError(res.message);
+      } else {
+        window.location.href = redirectUrl || "";
+      }
     } catch (err: any) {
       setError(err.message);
     }
   };
   return (
     <>
+      {/* TODO: add tostify for errors and message */}
       <Card title="Add Money">
         <div className="w-full">
           <TextInput
@@ -58,7 +63,7 @@ export const AddMoney = () => {
               value: x.name,
             }))}
           />
-        
+
           <div className=" flex justify-center pt-4">
             <Button
               onClick={async () => {
@@ -69,7 +74,11 @@ export const AddMoney = () => {
             </Button>
           </div>
         </div>
-        {error ? <div className="text-red-700 text-2xl flex justify-center">{error}</div> : null}
+        {error ? (
+          <div className="text-red-700 text-2xl flex justify-center">
+            {error}
+          </div>
+        ) : null}
       </Card>
     </>
   );
